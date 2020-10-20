@@ -12,8 +12,9 @@ create_university()
 	fi
 		
 	mkdir "University"
-	destination=$destination"/University"
+	destination=$destination"University/"
 	cd $destination
+	touch log.txt
 	
 	for (( i=0; i < ${#courses[@]}; i++ )) #
 	do
@@ -39,12 +40,32 @@ create_university()
 }
 
 find_and_mv_files(){
+	# function to search all occurence of data in $courses( an arrays of courses) and
+	# copy that occurence in dest
+	# param : $1 = source, where to do the search
+	# param : $2 = destination, where to copy the founded file 
 	src=$1
-	to_search=$2
-	dest=$3
+	dest=$2
+	lim=${#dest}
 
-	find $src  -iname *$to_search* 
+	for to_search in ${courses[*]}
+	do
+		dest=$dest$to_search
+		
+		find $src  -iname *$to_search* | xargs -i echo  "FROM "{}" TO "$dest" " > tmp.txt
 
+		grep -o -i -r -e $to_search $src | cut -d ':' -f1 | xargs -i echo  "FROM "{}" TO "$dest" " >> tmp.txt
+
+		cut  -d " " --fields 2  tmp.txt | xargs  -i cp "{}" $dest
+
+
+		echo "- Log mis a jour pour $to_search"
+		cat tmp.txt >> $log_file
+
+		dest=$2
+		
+	done
+	rm tmp.txt
 }
 
 main()
@@ -56,17 +77,8 @@ main()
 	
 	create_university # call function
 	cd ..
-	echo
-	#echo $( ls - grep ${courses[0]} )
-
-	# grep -o -i -r -n -e $var -e "info-f102" test_files/
-	# TODO cest la commande pour avoir les FICHIER qui INLCUDE le mot que tu cherches
-
-	echo $source
-	echo ${courses[*]}
-	#find $source  -iname *"info-f"* 
-	find_and_mv_files $source ${$( echo ${courses} ):0:6} $destination
-	#	fait la meme chose avec les fichiers ONT le mot DANS LEURS NOMS
+		
+	find_and_mv_files $source $destination
 	
 }
 
@@ -80,15 +92,22 @@ then
 		courses="$1"
 		source="$2"
 		destination="$3"
+		
 
 		
 		[[  ${destination:0:1} != "/" ]] && destination=$PWD"/"$destination
 		[[  ${source:0:1} != "/" ]] && source=$PWD"/"$source
 
+		[[  ${destination:${#destination}-1:${#destination}} != "/" ]] && destination=$destination"/"
+		[[  ${source:${#source}-1:${#source}} != "/" ]] && source=$source"/"
+
+		log_file=$destination"/University/log.txt"
+
 		echo
-		echo "- fichier     : $courses "
-		echo "- source      : $source "
-		echo "- destination : $destination "
+		echo "- Fichier     : $courses"
+		echo "- Source      : $source"
+		echo "- Destination : $destination"
+		echo "- Log file    : $log_file"
 		echo
 
 		main
