@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Adegnon Kokou Vinove
+# 0501910
+
 create_university()
 {
 	# this function create University directory and
@@ -18,25 +21,17 @@ create_university()
 	
 	for (( i=0; i < ${#courses[@]}; i++ )) #
 	do
-		#tmp=${courses[i]}
-		#tmp=${tmp:0:9}
-		#echo -n $tmp >> txt_file.txt
-		#courses[i]=$tmp
+		
 		if [ -d ${courses[i]} ] # TODO change this q1
 		then
 			rm -r ${courses[i]}
 		fi
-		
-		
-
 		mkdir ${courses[i]} 
-		
 		echo "- ${courses[i]} crée" 
-		#echo ${courses[@]}
+		
 		
 	done
-	
-	
+	echo
 }
 
 find_and_mv_files(){
@@ -44,34 +39,34 @@ find_and_mv_files(){
 	# copy that occurence in dest
 	# param : $1 = source, where to do the search
 	# param : $2 = destination, where to copy the founded file 
+
 	src=$1
 	dest=$2
 	lim=${#dest}
 
-	for to_search in ${courses[*]}
+	for to_search in ${courses[*]} # iterate on all the arrays 
 	do
-		dest=$dest$to_search
+		dest=$dest$to_search # get the right acces to the copy place
 		
-		find $src  -iname *$to_search* | xargs -i echo  "FROM "{}" TO "$dest" " > tmp.txt
+		find $src  -iname *$to_search* | xargs -i echo  "FROM "{}" TO "$dest" " > tmp.txt 
 
 		grep -o -i -r -e $to_search $src | cut -d ':' -f1 | xargs -i echo  "FROM "{}" TO "$dest" " >> tmp.txt
 
 		cut  -d " " --fields 2  tmp.txt | xargs  -i cp "{}" $dest
 
 
-		echo "- Log mis a jour pour $to_search"
+		echo "- Fichiers copiés, log mis à jour pour $to_search"
 		cat tmp.txt >> $log_file
 
 		dest=$2
 		
 	done
-	rm tmp.txt
+
+	rm tmp.txt #deleting the tmp file
 }
 
 main()
 {
-
-	
 	courses=($( cat "$courses" )) # put the result of cat command in courses arrays
 	cd $destination
 	
@@ -81,8 +76,6 @@ main()
 	find_and_mv_files $source $destination
 	
 }
-
-
 
 if [[ $# -eq 3 && -f "$1" && -d "$2" && -d "$3" ]]
 then
@@ -111,12 +104,19 @@ then
 		echo
 
 		main
+
+		echo
+		echo "END"
+		echo
+
+		exit 0
 	
 	else
 		echo
-		echo "Pas la permission de lire "
+		echo 2> "Pas la permission de lire " 
 		echo
-	
+
+		exit 1
 	fi
 else
 	echo
