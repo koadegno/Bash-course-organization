@@ -17,9 +17,10 @@ create_university()
 	
 	for (( i=0; i < ${#courses[@]}; i++ )) #
 	do
-		tmp=${courses[i]}
-		tmp=${tmp:0:9}
-		courses[i]=$tmp
+		#tmp=${courses[i]}
+		#tmp=${tmp:0:9}
+		#echo -n $tmp >> txt_file.txt
+		#courses[i]=$tmp
 		if [ -d ${courses[i]} ] # TODO change this q1
 		then
 			rm -r ${courses[i]}
@@ -29,7 +30,7 @@ create_university()
 
 		mkdir ${courses[i]} 
 		
-		echo "- ${courses[i]} crée"
+		echo "- ${courses[i]} crée" 
 		#echo ${courses[@]}
 		
 	done
@@ -37,21 +38,34 @@ create_university()
 	
 }
 
+find_and_mv_files(){
+	src=$1
+	to_search=$2
+	dest=$3
+
+	find $src  -iname *$to_search* 
+
+}
+
 main()
 {
 
 	
-	courses=($( cat "$courses" )) # put the result of cat in courses arrays
+	courses=($( cat "$courses" )) # put the result of cat command in courses arrays
 	cd $destination
 	
 	create_university # call function
+	cd ..
 	echo
 	#echo $( ls - grep ${courses[0]} )
 
 	# grep -o -i -r -n -e $var -e "info-f102" test_files/
 	# TODO cest la commande pour avoir les FICHIER qui INLCUDE le mot que tu cherches
 
-	#	find test_files -iname *$var*
+	echo $source
+	echo ${courses[*]}
+	#find $source  -iname *"info-f"* 
+	find_and_mv_files $source ${$( echo ${courses} ):0:6} $destination
 	#	fait la meme chose avec les fichiers ONT le mot DANS LEURS NOMS
 	
 }
@@ -68,8 +82,8 @@ then
 		destination="$3"
 
 		
-		[[  ${destination:0:1} != "/" ]] && destination="$PWD"/"$destination"
-		[[  ${source:0:1} != "/" ]] && source="$PWD"/"$source"
+		[[  ${destination:0:1} != "/" ]] && destination=$PWD"/"$destination
+		[[  ${source:0:1} != "/" ]] && source=$PWD"/"$source
 
 		echo
 		echo "- fichier     : $courses "
