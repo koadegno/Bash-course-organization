@@ -49,7 +49,7 @@ find_and_mv_files(){
 	do
 		dest=$dest$to_search # get the right acces to the copy place
 
-		# xargs is to use the input in a specific place		
+		# xargs is to use the input of the pipe in a specific place		
 		# find file with to_search in the name and write in tmp.txt
 		find $src  -iname *$to_search* | xargs -i echo  "FROM "{}" TO "$dest" " > tmp.txt 
 		
