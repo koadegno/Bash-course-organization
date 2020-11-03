@@ -1,7 +1,8 @@
 #!/bin/bash
 
+# 25/10/2020
 # Adegnon Kokou Vinove
-# 0501910
+# 501910
 
 create_university()
 {
@@ -19,10 +20,10 @@ create_university()
 	cd $destination
 	touch log.txt
 	
-	for (( i=0; i < ${#courses[@]}; i++ )) #
+	for (( i=0; i < ${#courses[@]}; i++ )) # until i == |courses|
 	do
 		
-		if [ -d ${courses[i]} ] # TODO change this q1
+		if [ -d ${courses[i]} ] # if the sub directory exist 
 		then
 			rm -r ${courses[i]}
 		fi
@@ -42,19 +43,23 @@ find_and_mv_files(){
 
 	src=$1
 	dest=$2
-	lim=${#dest}
+	#lim=${#dest}
 
 	for to_search in ${courses[*]} # iterate on all the arrays 
 	do
 		dest=$dest$to_search # get the right acces to the copy place
-		
-		find $src  -iname *$to_search* | xargs -i echo  "FROM "{}" TO "$dest" " > tmp.txt 
 
+		# xargs is to use the input in a specific place		
+		# find file with to_search in the name and write in tmp.txt
+		find $src  -iname *$to_search* | xargs -i echo  "FROM "{}" TO "$dest" " > tmp.txt 
+		
+		# find file with to_search inside cut to get the right field and write in tmp.txt 
 		grep -o -i -r -e $to_search $src | cut -d ':' -f1 | xargs -i echo  "FROM "{}" TO "$dest" " >> tmp.txt
 
+		# from the tmp.txt just cut, get the right field and copy to dest 
 		cut  -d " " --fields 2  tmp.txt | xargs  -i cp "{}" $dest
 
-
+		# move the content in tmp.txt inside log_file
 		echo "- Fichiers copiés, log mis à jour pour $to_search"
 		cat tmp.txt >> $log_file
 
@@ -73,7 +78,7 @@ main()
 	create_university # call function
 	cd ..
 		
-	find_and_mv_files $source $destination
+	find_and_mv_files $source $destination # give param to the function
 	
 }
 
@@ -87,7 +92,7 @@ then
 		destination="$3"
 		
 
-		
+	
 		[[  ${destination:0:1} != "/" ]] && destination=$PWD"/"$destination
 		[[  ${source:0:1} != "/" ]] && source=$PWD"/"$source
 
@@ -103,7 +108,7 @@ then
 		echo "- Log file    : $log_file"
 		echo
 
-		main
+		main # call main function
 
 		echo
 		echo "END"
@@ -113,15 +118,17 @@ then
 	
 	else
 		echo
-		echo 2> "Pas la permission de lire " 
+		>&2 echo  "Pas la permission de lire " 
 		echo
 
 		exit 1
 	fi
 else
 	echo
-	echo  "Structure de l'appel du script non respecter  !!! "
+	>&2 echo  "Structure de l'appel du script non respecter !"
 	echo
-
+	
+	exit 1
+		
 fi
 
